@@ -5,22 +5,22 @@ from torchvision import transforms
 
 
 src_train_transforms = []
-src_train_transforms.append(transforms.Resize(256))
+src_train_transforms.append(transforms.Resize(224))
 src_train_transforms.append(transforms.PILToTensor())
-src_train_transforms.append(transforms.ColorJitter(0.3,0.3,0.3,0.1))
+src_train_transforms.append(transforms.ColorJitter(0.1,0.1,0.1))
 src_train_transforms.append(transforms.ConvertImageDtype(torch.float))
 src_train_transforms.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
 src_train_transforms = transforms.Compose(src_train_transforms)
 
 src_val_transforms = []
-src_val_transforms.append(transforms.Resize(256))
+src_val_transforms.append(transforms.Resize(224))
 src_val_transforms.append(transforms.PILToTensor())
 src_val_transforms.append(transforms.ConvertImageDtype(torch.float))
 src_val_transforms.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
 src_val_transforms = transforms.Compose(src_val_transforms)
 
 target_transforms = []
-target_transforms.append(transforms.Resize(256))
+target_transforms.append(transforms.Resize(224))
 target_transforms.append(transforms.PILToTensor())
 target_transforms.append(transforms.Lambda(lambda img: img[0]))
 target_transforms.append(transforms.Lambda(lambda img: img.type(torch.long)))

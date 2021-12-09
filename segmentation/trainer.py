@@ -19,33 +19,44 @@ class Solver:
         train_loss_history = []
         val_loss_history = []
 
-        for epoch in range(1):
+        for epoch in range(num_epochs):
             epoch_start_time = time.time()
+            total_load_time = 0
+            total_backprop_time = 0
 
             train_loss = 0
             num_points = 0
+            load_start_time = time.time()
             for idx, (images, targets) in enumerate(self.trainLoader):
+                load_end_time = time.time()
+                total_load_time += load_end_time - load_start_time
                 # Get images and targets
                 images = images.to(self.device)  # Load Images into correct device
                 targets = targets.to(self.device)  # Load Targets into correct device
-                
+
                 # zero parameter gradients
-                optimizer.zero_grad()
+                for param in self.model.parameters():
+                    param.grad = None
                 
                 # Forward pass the network
                 scores = self.model(images)
-                scores = torch.nn.functional.softmax(scores, dim=1)
+
+                loss_start_time = time.time()
+                # scores = torch.nn.functional.softmax(scores, dim=1)
                 
                 # Calculate loss and backpropogate
                 loss = criterion(scores, targets)
                 loss.backward()
                 optimizer.step()
 
+                loss_end_time = time.time()
+                total_backprop_time += loss_end_time - loss_start_time
+
                 # Per iteration Logging functionality
                 train_loss += loss
                 pct_done = (idx+1)/len(self.trainLoader)*100
                 print("\rTraining {0:0.2f}%: Loss {1:0.5f}".format(pct_done, train_loss/idx), end="")
-
+                load_start_time = time.time()
             # Per Epoch Functionality
             if lr_scheduler:
                 lr_scheduler.step()
@@ -68,7 +79,8 @@ class Solver:
             elapsed_time = epoch_end_time - epoch_start_time
             print("\nEpoch {0} Completed in {1:0.2f} Seconds".format(epoch, elapsed_time))
             print("Training Loss: {0:0.5f} Validation Loss: {1:0.5f}".format(train_loss, val_loss))
-
+            print("load time: ", total_load_time)
+            print("loss time: ", total_backprop_time)
         return train_loss_history, val_loss_history
     
     def save_model(filename):
